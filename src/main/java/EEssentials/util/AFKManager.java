@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3i;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class AFKManager {
      */
     public static void checkAFKStatuses(MinecraftServer server) {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            long currentTime = player.getServerWorld().getTime();
+            long currentTime = player.getWorld().getTime();
 
             if (Permissions.check(player, AFK_KICKEXEMPT_PERMISSION_NODE, 2)) {
                 continue;
@@ -193,7 +194,7 @@ public class AFKManager {
      * @param player The player whose activity will be reset.
      */
     public static void resetActivity(ServerPlayerEntity player) {
-        lastActivity.put(player.getUuid(), player.getServerWorld().getTime());
+        lastActivity.put(player.getUuid(), player.getWorld().getTime());
     }
 
     /**

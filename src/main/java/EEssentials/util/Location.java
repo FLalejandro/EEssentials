@@ -6,6 +6,7 @@ package EEssentials.util;
 
 import EEssentials.EEssentials;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,6 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
 import java.util.Map;
+import java.util.Set;
 
 public class Location {
     private final ServerWorld world;  // The world where the location resides
@@ -45,20 +47,20 @@ public class Location {
     }
 
     public static Location fromPlayer(ServerPlayerEntity player) {
-        return new Location(player.getServerWorld(), player.getX(), player.getY(), player.getZ());
+        return new Location(player.getWorld(), player.getX(), player.getY(), player.getZ());
     }
 
     public static Location fromEssentialCommandsNbt(NbtCompound tag) {
         return new Location(
                 EEssentials.server.getWorld(RegistryKey.of(
-                        RegistryKeys.WORLD,
-                        Identifier.tryParse(tag.getString("WorldRegistryKey"))
+                        RegistryKeys.WORLD, 
+                        Identifier.tryParse(tag.getString("WorldRegistryKey", "minecraft:overworld"))
                 )),
-                tag.getDouble("x"),
-                tag.getDouble("y"),
-                tag.getDouble("z"),
-                tag.getFloat("headYaw"),
-                tag.getFloat("pitch")
+                tag.getDouble("x").orElseThrow(),
+                tag.getDouble("y").orElseThrow(),
+                tag.getDouble("z").orElseThrow(),
+                tag.getFloat("headYaw", 0f),
+                tag.getFloat("pitch", 0f)
         );
     }
 
@@ -106,7 +108,7 @@ public class Location {
     public void teleport(ServerPlayerEntity player) {
         float tpPitch = (pitch != -1000) ? pitch : player.getPitch();
         float tpYaw = (yaw != -1000) ? yaw : player.getYaw();
-        player.teleport(world, x, y, z, tpYaw, tpPitch);
+        player.teleport(world, x, y, z, Set.of(PositionFlag.X_ROT, PositionFlag.Y_ROT), tpYaw, tpPitch, false);
     }
 
     /**

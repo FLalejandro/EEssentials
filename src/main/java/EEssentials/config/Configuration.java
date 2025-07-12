@@ -57,6 +57,7 @@ public class Configuration {
         return (index == -1) ? path : path.substring(index + 1);
     }
 
+    @SuppressWarnings("unchecked") // Just to remove the ugly warning
     public <T> T get(String path, T def) {
         Configuration section = getSectionFor(path);
         Object val;

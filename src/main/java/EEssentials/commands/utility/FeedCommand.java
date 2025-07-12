@@ -64,7 +64,7 @@ public class FeedCommand {
             LangManager.send(player, "Feed-Self");  // Player feeding themselves
         } else {
             LangManager.send(player, "Feed-Other-Notify", Map.of("{source}", source.getName()));  // Player being fed by someone else
-            LangManager.send(source, "Feed-Other", Map.of("{player}", player.getName().getString()));  // The feeder receives this message
+            LangManager.send(source.getPlayer(), "Feed-Other", Map.of("{player}", player.getName().getString()));  // The feeder receives this message
         }
 
         return 1;

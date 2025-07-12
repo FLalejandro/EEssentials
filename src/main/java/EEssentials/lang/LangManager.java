@@ -1,12 +1,15 @@
 package EEssentials.lang;
 
 import EEssentials.config.Configuration;
-import net.kyori.adventure.audience.Audience;
+import net.minecraft.server.network.ServerPlayerEntity;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class LangManager {
     private static final Map<String, String> lang = new HashMap<>();
@@ -23,17 +26,20 @@ public class LangManager {
         return lang.get(langKey);
     }
 
-    public static void send(Audience audience, String langKey) {
-        send(audience, langKey, null);
+    public static void send(ServerPlayerEntity player, String langKey) {
+        if(player == null) return;
+        send(player, langKey, null);
     }
 
-    public static void send(@NotNull Audience audience, @NotNull String langKey,
+    public static void send(ServerPlayerEntity player, @NotNull String langKey,
                             @Nullable Map<String, String> replacements) {
-        send(audience, null, langKey, replacements);
+        if(player == null) return;
+        send(player, null, langKey, replacements);
     }
 
-    public static void send(@NotNull Audience audience, @Nullable String prefixKey,
+    public static void send(ServerPlayerEntity player, @Nullable String prefixKey,
                                     @NotNull String langKey, @Nullable Map<String, String> replacements) {
+        if(player == null) return;
         String lang = getLang(langKey);
         if(lang == null) return;
         if(replacements != null && !replacements.isEmpty()) {
@@ -43,6 +49,9 @@ public class LangManager {
         }
         String prefix = getLang(prefixKey);
         if(prefix != null) lang = prefix + lang;
-        audience.sendMessage(ColorUtil.parseColour(lang));
+        // Parse to Kyori Component, serialize to legacy string, then send as Text.literal
+        net.kyori.adventure.text.Component component = ColorUtil.parseColour(lang);
+        String legacy = LegacyComponentSerializer.legacySection().serialize(component);
+        player.sendMessage(net.minecraft.text.Text.literal(legacy));
     }
 }

@@ -29,19 +29,19 @@ public class TopCommand {
                 .executes(context -> {
                     ServerPlayerEntity player = context.getSource().getPlayer();
                     if(player != null) {
-                        double teleportY = TeleportUtil.findNextBelowNoCaves(player.getServerWorld(), player.getX(), 320, player.getZ());
+                        double teleportY = TeleportUtil.findNextBelowNoCaves(player.getWorld(), player.getX(), 320, player.getZ());
                         if(teleportY == -1000) {
-                            LangManager.send(context.getSource(), "Top-Unsafe-Message");
+                            LangManager.send(context.getSource().getPlayer(), "Top-Unsafe-Message");
                         } else if(teleportY == player.getY()) {
-                            LangManager.send(context.getSource(), "Top-Already-Highest");
+                            LangManager.send(context.getSource().getPlayer(), "Top-Already-Highest");
                         } else {
-                            Location tpLocation = new Location(player.getServerWorld(), player.getX(), teleportY, player.getZ());
+                            Location tpLocation = new Location(player.getWorld(), player.getX(), teleportY, player.getZ());
                             tpLocation.teleport(player);
                             tpLocation.addReplacements(replacements);
-                            LangManager.send(context.getSource(), "Top-Success-Message", replacements);
+                            LangManager.send(context.getSource().getPlayer(), "Top-Success-Message", replacements);
                         }
                     } else {
-                        LangManager.send(context.getSource(), "Invalid-Player-Only");
+                        LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                     }
                     return Command.SINGLE_SUCCESS;
                 }));

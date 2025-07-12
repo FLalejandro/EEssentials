@@ -12,7 +12,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -39,7 +38,7 @@ public class EnchantCommand {
         ServerPlayerEntity player = context.getSource().getPlayer();
         boolean unrestricted = Permissions.check(player, ENCHANT_UNRESTRICTED_PERMISSION_NODE, 2);
 
-        Registry<Enchantment> enchantmentRegistry = context.getSource().getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = context.getSource().getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 
         return CommandSource.suggestMatching(
                 enchantmentRegistry.stream()
@@ -65,7 +64,7 @@ public class EnchantCommand {
         ItemEnchantmentsComponent enchantmentsComponent = EnchantmentHelper.getEnchantments(itemStack);
 
         // Get the enchantment registry using the registry manager
-        Registry<Enchantment> enchantmentRegistry = context.getSource().getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = context.getSource().getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 
         return CommandSource.suggestMatching(
                 enchantmentsComponent.getEnchantmentEntries().stream()
@@ -118,7 +117,7 @@ public class EnchantCommand {
         }
 
         // Get the enchantment registry using the registry manager and RegistryKey
-        Registry<Enchantment> enchantmentRegistry = ctx.getSource().getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = ctx.getSource().getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         Identifier enchantmentId = Identifier.of("minecraft", enchantmentName);
         Enchantment enchantment = enchantmentRegistry.get(enchantmentId);
 
@@ -128,7 +127,7 @@ public class EnchantCommand {
         }
 
         // Convert the Enchantment to a RegistryEntry<Enchantment>
-        RegistryEntry<Enchantment> enchantmentEntry = enchantmentRegistry.entryOf(enchantmentRegistry.getKey(enchantment).orElseThrow());
+        RegistryEntry<Enchantment> enchantmentEntry = enchantmentRegistry.getEntry(enchantmentRegistry.getKey(enchantment).orElseThrow().getValue()).orElseThrow();
 
         // Permission check
         boolean hasUnrestrictedPermission = Permissions.check(player, ENCHANT_UNRESTRICTED_PERMISSION_NODE, 2);
@@ -179,7 +178,7 @@ public class EnchantCommand {
         }
 
         // Get the enchantment registry using the registry manager and RegistryKey
-        Registry<Enchantment> enchantmentRegistry = ctx.getSource().getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = ctx.getSource().getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         Identifier enchantmentId = Identifier.of("minecraft", enchantmentName);
         Enchantment enchantment = enchantmentRegistry.get(enchantmentId);
 
@@ -189,7 +188,7 @@ public class EnchantCommand {
         }
 
         // Convert the Enchantment to a RegistryEntry<Enchantment>
-        RegistryEntry<Enchantment> enchantmentEntry = enchantmentRegistry.entryOf(enchantmentRegistry.getKey(enchantment).orElseThrow());
+        RegistryEntry<Enchantment> enchantmentEntry = enchantmentRegistry.getEntry(enchantmentRegistry.getKey(enchantment).orElseThrow().getValue()).orElseThrow();
 
         try {
             // Get the current enchantments component

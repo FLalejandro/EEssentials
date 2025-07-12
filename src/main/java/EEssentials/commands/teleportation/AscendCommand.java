@@ -30,14 +30,14 @@ public final class AscendCommand {
                     if(player != null) {
                         Pair<Integer, Location> aboveLocation = getOpenYLocationAbove(player, 1);
                         if(aboveLocation == null) {
-                            LangManager.send(context.getSource(), "Ascend-Location-Not-Found");
+                            LangManager.send(context.getSource().getPlayer(), "Ascend-Location-Not-Found");
                         } else {
                             aboveLocation.getRight().teleport(player);
                             aboveLocation.getRight().addReplacements(replacements);
-                            LangManager.send(context.getSource(), "Ascended-Message", replacements);
+                            LangManager.send(context.getSource().getPlayer(), "Ascended-Message", replacements);
                         }
                     } else {
-                        LangManager.send(context.getSource(), "Invalid-Player-Only");
+                        LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                     }
                     return Command.SINGLE_SUCCESS;
                 })
@@ -48,15 +48,15 @@ public final class AscendCommand {
                             if(player != null) {
                                 Pair<Integer, Location> aboveLocation = getOpenYLocationAbove(player, levels);
                                 if(aboveLocation == null) {
-                                    LangManager.send(context.getSource(), "Ascend-Location-Not-Found");
+                                    LangManager.send(context.getSource().getPlayer(), "Ascend-Location-Not-Found");
                                 } else {
                                     aboveLocation.getRight().teleport(player);
                                     aboveLocation.getRight().addReplacements(replacements);
                                     replacements.put("{levels}", String.valueOf(aboveLocation.getLeft()));
-                                    LangManager.send(context.getSource(), "Ascended-Levels-Message", replacements);
+                                    LangManager.send(context.getSource().getPlayer(), "Ascended-Levels-Message", replacements);
                                 }
                             } else {
-                                LangManager.send(context.getSource(), "Invalid-Player-Only");
+                                LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                             }
                             return Command.SINGLE_SUCCESS;
                         })));
@@ -65,12 +65,12 @@ public final class AscendCommand {
     private static Pair<Integer, Location> getOpenYLocationAbove(ServerPlayerEntity player, int levels) {
         double teleportY = player.getY();
         for(int l = 0; l < levels; l++) {
-            double nextY = TeleportUtil.findNextAbove(player.getServerWorld(), player.getX(), teleportY, player.getZ());
+            double nextY = TeleportUtil.findNextAbove(player.getWorld(), player.getX(), teleportY, player.getZ());
             if(nextY == -1000D) {
                 if(teleportY == player.getY()) return null;
-                return new Pair<>(l, new Location(player.getServerWorld(), player.getX(), teleportY, player.getZ()));
+                return new Pair<>(l, new Location(player.getWorld(), player.getX(), teleportY, player.getZ()));
             } else teleportY = nextY;
         }
-        return new Pair<>(levels, new Location(player.getServerWorld(), player.getX(), teleportY, player.getZ()));
+        return new Pair<>(levels, new Location(player.getWorld(), player.getX(), teleportY, player.getZ()));
     }
 }

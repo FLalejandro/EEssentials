@@ -70,7 +70,7 @@ public class GodModeCommand {
             LangManager.send(player, "God-Mode-Disabled");
 
             if (!player.equals(source.getPlayer())) {
-                LangManager.send(source, "God-Mode-Other-Disabled", Map.of("{player}", player.getName().getString()));
+                LangManager.send(source.getPlayer(), "God-Mode-Other-Disabled", Map.of("{player}", player.getName().getString()));
             }
         } else {
             godModePlayers.add(playerId);
@@ -79,7 +79,7 @@ public class GodModeCommand {
             LangManager.send(player, "God-Mode-Enabled");
 
             if (!player.equals(source.getPlayer())) {
-                LangManager.send(source, "God-Mode-Other-Enabled", Map.of("{player}", player.getName().getString()));
+                LangManager.send(source.getPlayer(), "God-Mode-Other-Enabled", Map.of("{player}", player.getName().getString()));
             }
         }
 

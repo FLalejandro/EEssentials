@@ -109,10 +109,10 @@ public class GamemodeAliasesCommands {
         Map<String, String> replacements = Map.of("{gameMode}", formattedGameModeName, "{player}", player.getName().getString(), "{source}", source.getName());
 
         if (player.equals(source.getPlayer())) {
-            LangManager.send(source, "GameMode-Change-Self", replacements);
+            LangManager.send(source.getPlayer(), "GameMode-Change-Self", replacements);
         } else {
             LangManager.send(player, "GameMode-Change-Other-Notify", replacements);
-            LangManager.send(source, "GameMode-Change-Other", replacements);
+            LangManager.send(source.getPlayer(), "GameMode-Change-Other", replacements);
         }
         return 1;
     }

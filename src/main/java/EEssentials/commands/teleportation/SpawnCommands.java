@@ -38,7 +38,7 @@ public class SpawnCommands {
                     if (player == null) return 0;
 
                     // Use these values to create the new Location
-                    Location spawnLocation = new Location(player.getServerWorld(), player.getX(), player.getY(), player.getZ(), player.getPitch(), player.getYaw());
+                    Location spawnLocation = new Location(player.getWorld(), player.getX(), player.getY(), player.getZ(), player.getPitch(), player.getYaw());
                     EEssentials.storage.locationManager.setSpawn(spawnLocation);
                     LangManager.send(player, "Spawn-Set");
                     return 1;
@@ -74,7 +74,7 @@ public class SpawnCommands {
             if (player.equals(source.getPlayer())) {
                 LangManager.send(player, "Teleporting-To-Spawn");
             } else {
-                LangManager.send(source, "Teleporting-Player-To-Spawn", Map.of("{player}", player.getName().getString()));
+                LangManager.send(source.getPlayer(), "Teleporting-Player-To-Spawn", Map.of("{player}", player.getName().getString()));
             }
             return 1;
         } else {

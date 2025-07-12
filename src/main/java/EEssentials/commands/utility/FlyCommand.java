@@ -83,7 +83,7 @@ public class FlyCommand {
             String sourceKey = newFlightAbilityStatus ? "Flight-Enabled-Other-Notify" : "Flight-Disabled-Other-Notify";
             Map<String, String> sourceReplacements = new HashMap<>();
             sourceReplacements.put("{player}", targetPlayer.getName().getString());
-            LangManager.send(source, sourceKey, sourceReplacements);
+            LangManager.send(source.getPlayer(), sourceKey, sourceReplacements);
         }
 
         return 1;

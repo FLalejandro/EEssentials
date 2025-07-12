@@ -13,6 +13,7 @@ import EEssentials.settings.randomteleport.RTPSettings;
 import EEssentials.storage.PlayerStorage;
 import EEssentials.storage.StorageManager;
 import EEssentials.util.*;
+import EEssentials.util.EEssentialsLogger;
 import EEssentials.util.importers.EssentialCommandsImporter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -22,13 +23,13 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPermsProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.stat.Stats;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.minecraft.text.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,9 +39,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 /**
  * The main class for the EEssentials mod, responsible for mod initialization and other lifecycle events.
@@ -48,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 public class EEssentials implements ModInitializer {
 
     // Logger instance for logging messages related to EEssentials.
-    public static final Logger LOGGER = LoggerFactory.getLogger("EEssentials");
+    public static final EEssentialsLogger LOGGER = new EEssentialsLogger();
 
     // Storage manager instance for handling data storage for EEssentials.
     public static final StorageManager storage =
@@ -62,6 +65,12 @@ public class EEssentials implements ModInitializer {
 
     // Singleton instance of the mod.
     public static final EEssentials INSTANCE = new EEssentials();
+
+    // Flag to track if the mod is fully initialized and ready to accept players
+    private static volatile boolean isModFullyInitialized = false;
+
+    // Set to track players that have already been processed for disconnect
+    private static final java.util.Set<UUID> processedDisconnects = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
 
     // Counters for tracking ticks in the server. Used for various timed functionalities.
     private static int tickCounter = 0;
@@ -104,7 +113,11 @@ public class EEssentials implements ModInitializer {
         PlaceholderRegister.RegisterPlaceholders();
 
         // Tells the asynchronous executor to shut down when the server does to not have hanging threads.
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> AsynchronousUtil.shutdown());
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            AsynchronousUtil.shutdown();
+            // Clean up the processed disconnects set
+            processedDisconnects.clear();
+        });
 
     }
 
@@ -112,6 +125,86 @@ public class EEssentials implements ModInitializer {
      * Register all commands provided by the mod.
      */
     private void registerCommands() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+
+            // Reload Command - Should not be allowed to be toggled
+            ReloadCommand.register(dispatcher);
+
+            // Command registry map - More readable approach
+            // Map.entry("(Commands.)commandName", () -> (CommandClass).register(dispatcher))
+            // The old method is under this one, if you want to revert the changes
+            Map<String, Runnable> commandRegistry = Map.ofEntries(
+                Map.entry("afk", () -> AFKCommand.register(dispatcher)),
+                Map.entry("ascend", () -> AscendCommand.register(dispatcher)),
+                Map.entry("back", () -> BackCommand.register(dispatcher)),
+                Map.entry("biomertp", () -> BiomeRTPCommand.register(dispatcher, registryAccess)),
+                Map.entry("broadcast", () -> BroadcastCommand.register(dispatcher)),
+                Map.entry("time", () -> CheckTimeCommand.register(dispatcher)),
+                Map.entry("clearinventory", () -> ClearInventoryCommand.register(dispatcher)),
+                Map.entry("descend", () -> DescendCommand.register(dispatcher)),
+                Map.entry("disposal", () -> DisposalCommand.register(dispatcher)),
+                Map.entry("enchant", () -> EnchantCommand.register(dispatcher)),
+                Map.entry("enchantmenttable", () -> EnchantmentTableCommand.register(dispatcher)),
+                Map.entry("feed", () -> FeedCommand.register(dispatcher)),
+                Map.entry("fly", () -> FlyCommand.register(dispatcher)),
+                Map.entry("godmode", () -> GodModeCommand.register(dispatcher)),
+                Map.entry("hat", () -> HatCommand.register(dispatcher)),
+                Map.entry("heal", () -> HealCommand.register(dispatcher)),
+                Map.entry("home", () -> HomeCommands.register(dispatcher)),
+                Map.entry("ignore", () -> IgnoreCommands.register(dispatcher)),
+                Map.entry("invsee", () -> InvseeCommand.register(dispatcher)),
+                Map.entry("itemeditor", () -> ItemEditorCommand.register(dispatcher)),
+                Map.entry("gm", () -> GamemodeAliasesCommands.register(dispatcher)),
+                Map.entry("mail", () -> MailCommands.register(dispatcher)),
+                Map.entry("message", () -> {
+                    MessageCommands.register(dispatcher);
+                    SocialSpyCommand.register(dispatcher);
+                }),
+                Map.entry("near", () -> NearCommand.register(dispatcher)),
+                Map.entry("nightvision", () -> NightVisionCommand.register(dispatcher)),
+                Map.entry("playtime", () -> PlaytimeCommand.register(dispatcher)),
+                Map.entry("repair", () -> RepairCommand.register(dispatcher)),
+                Map.entry("rtp", () -> RTPCommand.register(dispatcher)),
+                Map.entry("seen", () -> SeenCommand.register(dispatcher)),
+                Map.entry("smite", () -> SmiteCommand.register(dispatcher)),
+                Map.entry("spawn", () -> SpawnCommands.register(dispatcher)),
+                Map.entry("speed", () -> SpeedCommand.register(dispatcher)),
+                Map.entry("top", () -> TopCommand.register(dispatcher)),
+                Map.entry("tp", () -> {
+                    TPHereCommand.register(dispatcher);
+                    TPOfflineCommand.register(dispatcher);
+                }),
+                Map.entry("tpa", () -> TPACommands.register(dispatcher)),
+                Map.entry("unalive", () -> UnaliveCommand.register(dispatcher)),
+                Map.entry("warp", () -> WarpCommands.register(dispatcher)),
+                Map.entry("workstation", () -> {
+                    AnvilCommand.register(dispatcher);
+                    CartographyCommand.register(dispatcher);
+                    EnderchestCommand.register(dispatcher);
+                    GrindstoneCommand.register(dispatcher);
+                    LoomCommand.register(dispatcher);
+                    StonecutterCommand.register(dispatcher);
+                    SmithingCommand.register(dispatcher);
+                    WorkbenchCommand.register(dispatcher);
+                }),
+                Map.entry("text", () -> {
+                    List<String> allTextCommands = getTextCommands();
+                    for (String textCommand : allTextCommands) {
+                        new TextCommand(textCommand, dispatcher);
+                    }
+                })
+            );
+
+            // Register commands if enabled in config
+            commandRegistry.forEach((commandName, registration) -> {
+                if (mainConfig.getBoolean("Commands." + commandName, true)) {
+                    registration.run();
+                }
+            });
+        });
+    }
+
+    /*private void registerCommands() { // Old method
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
             // Reload Command - Should not be allowed to be toggled
@@ -255,7 +348,7 @@ public class EEssentials implements ModInitializer {
                 }
             }
         });
-    }
+    }*/
 
     /**
      * Register listeners that should be executed when the server starts.
@@ -265,35 +358,47 @@ public class EEssentials implements ModInitializer {
             // Schedule a task with a 2-second delay
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
-                setupPermissions();
-                EEssentials.server = server;
-                storage.serverStarted();
+            setupPermissions();
+            EEssentials.server = server;
+            storage.serverStarted();
+            
+            // Load Locations.json after the server has started
+            if (storage.locationManager != null) {
+                storage.locationManager.load();
+                LOGGER.info("Locations.json loaded successfully.");
+            } else {
+                LOGGER.warn("locationManager is null, cannot load Locations.json");
+            }
 
-                // Load Locations.json after the server has started
-                if (storage.locationManager != null) {
-                    storage.locationManager.load();
-                    LOGGER.info("Locations.json loaded successfully.");
-                } else {
-                    LOGGER.warn("locationManager is null, cannot load Locations.json");
-                }
+            // Read the EssentialCommands import toggle from the configuration
+            boolean ECImportFlag = mainConfig.getBoolean("Importers.EssentialCommands", false);
 
-                // Read the EssentialCommands import toggle from the configuration
-                boolean ECImportFlag = mainConfig.getBoolean("Importers.EssentialCommands", false);
+            if (ECImportFlag && !storage.locationManager.modImports.contains("essential_commands")) {
+                LOGGER.info("Importing World Data from Essential Commands...");
+                EssentialCommandsImporter.loadEssentialCommandsWorldData();
+                LOGGER.info("Imported World Data from Essential Commands.");
+                storage.locationManager.modImports.add("essential_commands");
+                storage.locationManager.save();
+            } else {
+                LOGGER.info("Importing from Essential Commands is disabled in the configuration.");
+            }
 
-                if (ECImportFlag && !storage.locationManager.modImports.contains("essential_commands")) {
-                    LOGGER.info("Importing World Data from Essential Commands...");
-                    EssentialCommandsImporter.loadEssentialCommandsWorldData();
-                    LOGGER.info("Imported World Data from Essential Commands.");
-                    storage.locationManager.modImports.add("essential_commands");
-                    storage.locationManager.save();
-                } else {
-                    LOGGER.info("Importing from Essential Commands is disabled in the configuration.");
-                }
+            // UPDATE THE FLAG THAT THE MOD DATA IS FULLY LOADED
+            isModFullyInitialized = true;
+            LOGGER.info("EEssentials initialization complete - players can now join!");
             }, 2, TimeUnit.SECONDS);
 
             // Shutdown the scheduler after the task is completed
             scheduler.shutdown();
         });
+    }
+
+    /**
+     * Check if the mod is fully initialized and ready to accept players.
+     * @return true if the mod is fully initialized, false otherwise.
+     */
+    public static boolean isModFullyInitialized() {
+        return isModFullyInitialized;
     }
 
     /**
@@ -323,20 +428,42 @@ public class EEssentials implements ModInitializer {
      * Register listeners for player connection events, like joining or leaving the server.
      */
     private void registerConnectionEventListeners() {
+        // Prevent players from joining before the mod is fully initialized
+        ServerPlayConnectionEvents.INIT.register((ServerPlayNetworkHandler handler, MinecraftServer server) -> {
+            if (!isModFullyInitialized()) {
+                LOGGER.info("Player " + handler.player.getGameProfile().getName() + " attempted to join before mod initialization was complete. Kicking player.");
+                handler.disconnect(Text.literal("The server will be §aready§r very soon"));
+            }
+        });
+
         // Actions to perform when a player disconnects from the server.
         ServerPlayConnectionEvents.DISCONNECT.register((ServerPlayNetworkHandler handler, MinecraftServer server) -> {
-            PlayerStorage storage = EEssentials.storage.getPlayerStorage(handler.player);
-            if (storage != null) {
-                int currentPlaytime = handler.player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
-                storage.setTotalPlaytime(currentPlaytime);
-                Location currentLogoutLocation = Location.fromPlayer(handler.player);
-                storage.setLogoutLocation(currentLogoutLocation);
-                storage.setLastTimeOnline();
-                storage.save();
-            } else {
-                EEssentials.LOGGER.warn("PlayerStorage not found on disconnect for player: " + handler.player.getName().getString());
+            UUID playerUUID = handler.player.getUuid();
+            
+            // Check if this player has already been processed for disconnect
+            if (processedDisconnects.contains(playerUUID)) {
+                EEssentials.LOGGER.debug("Player " + handler.player.getName().getString() + " already processed for disconnect, skipping");
+                return;
             }
-            EEssentials.storage.playerLeft(handler.player);
+            
+            // Mark this player as processed for disconnect
+            processedDisconnects.add(playerUUID);
+            
+            // Only process disconnect data if the mod is fully initialized
+            if (isModFullyInitialized()) {
+                PlayerStorage storage = EEssentials.storage.getPlayerStorage(handler.player);
+                if (storage != null) {
+                    int currentPlaytime = handler.player.getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
+                    storage.setTotalPlaytime(currentPlaytime);
+                    Location currentLogoutLocation = Location.fromPlayer(handler.player);
+                    storage.setLogoutLocation(currentLogoutLocation);
+                    storage.setLastTimeOnline();
+                    storage.save();
+                } else {
+                    EEssentials.LOGGER.warn("PlayerStorage not found on disconnect for player: " + handler.player.getName().getString());
+                }
+                EEssentials.storage.playerLeft(handler.player);
+            }
 
             // Reset AFK status and activity timer for the disconnecting player.
             AFKManager.setAFK(handler.player, false, false);
@@ -345,19 +472,27 @@ public class EEssentials implements ModInitializer {
 
         // Actions to perform when a player joins the server.
         ServerPlayConnectionEvents.JOIN.register((ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) -> {
-            PlayerStorage storage = EEssentials.storage.getPlayerStorage(handler.player.getUuid());
-            if (storage != null) {
-                storage.setPlayerName(handler.player.getName().getString()); // Set the player's name
-                if (!storage.playedBefore) {
-                    storage.playedBefore = true; // Mark as having played before
-                    Location spawn = EEssentials.storage.locationManager.serverSpawn;
-                    if (spawn != null) {
-                        spawn.teleport(handler.player);
+            UUID playerUUID = handler.player.getUuid();
+            
+            // Remove player from processed disconnects set when they join
+            processedDisconnects.remove(playerUUID);
+            
+            // Only process join data if the mod is fully initialized
+            if (isModFullyInitialized()) {
+                PlayerStorage storage = EEssentials.storage.forceLoadPlayerStorage(handler.player.getUuid());
+                if (storage != null) {
+                    storage.setPlayerName(handler.player.getName().getString()); // Set the player's name
+                    if (!storage.playedBefore) {
+                        storage.playedBefore = true; // Mark as having played before
+                        Location spawn = EEssentials.storage.locationManager.serverSpawn;
+                        if (spawn != null) {
+                            spawn.teleport(handler.player);
+                        }
                     }
+                    storage.save(); // Save the updated storage
+                } else {
+                    EEssentials.LOGGER.warn("PlayerStorage not found on join for player: " + handler.player.getName().getString());
                 }
-                storage.save(); // Save the updated storage
-            } else {
-                EEssentials.LOGGER.warn("PlayerStorage not found on join for player: " + handler.player.getName().getString());
             }
 
             // Reset AFK timers for the joining player.
@@ -368,9 +503,10 @@ public class EEssentials implements ModInitializer {
 
             // Send the MOTD to the player when they join
             Component motdComponent = TextCommand.getMotd(source);
-            // Send only if the MOTD is not empty
-            if (!motdComponent.equals(Component.text(""))) {
-                handler.player.sendMessage(motdComponent);
+            // Serialize the component to legacy section color codes for Minecraft chat
+            String legacy = LegacyComponentSerializer.legacySection().serialize(motdComponent);
+            if (!legacy.isEmpty()) {
+                handler.player.sendMessage(Text.literal(legacy));
             }
         });
     }

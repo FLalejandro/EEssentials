@@ -9,7 +9,6 @@ import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandSource;
 import static net.minecraft.server.command.CommandManager.*;
-import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.stat.Stats;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -57,7 +56,7 @@ public class PlaytimeCommand {
         ServerCommandSource source = ctx.getSource();
         ServerPlayerEntity player = source.getPlayer();
         if (player == null) {
-            LangManager.send(source, "Invalid-Player", Map.of());
+            LangManager.send(source.getPlayer(), "Invalid-Player", Map.of());
             return 0;
         }
 
@@ -91,14 +90,14 @@ public class PlaytimeCommand {
             GameProfile profile = SeenCommand.getProfileForName(targetName);
 
             if (profile == null || profile.getId() == null) {
-                LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+                LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
                 return 0;
             }
 
             // Fetch the player storage for the offline player
             PlayerStorage storage = PlayerStorage.fromPlayerUUID(profile.getId());
             if (storage == null) {
-                LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+                LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
                 return 0;
             }
 
@@ -115,7 +114,7 @@ public class PlaytimeCommand {
         replacements.put("{playtime}", timeString);
         replacements.put("{player}", targetName);
 
-        LangManager.send(source, "Playtime-Other", replacements);
+        LangManager.send(source.getPlayer(), "Playtime-Other", replacements);
 
         return 1;
     }

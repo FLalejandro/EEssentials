@@ -40,7 +40,13 @@ public class PlayerStorage {
         this.playerUUID = uuid;
         this.playedBefore = false;
         this.lastTimeOnline = Instant.now();
-        this.load();
+        
+        // Only load data if the mod is fully initialized to prevent data corruption
+        if (EEssentials.isModFullyInitialized()) {
+            this.load();
+        } else {
+            EEssentials.LOGGER.info("Skipping PlayerStorage load for " + uuid + " - mod not fully initialized");
+        }
     }
 
 
@@ -64,7 +70,7 @@ public class PlayerStorage {
      * @return the PlayerStorage instance if exists, null otherwise.
      */
     public static PlayerStorage fromPlayerUUID(UUID uuid) {
-        File file = EEssentials.storage.playerStorageDirectory.resolve(uuid.toString() + ".json").toFile();
+        File file = StorageManager.playerStorageDirectory.resolve(uuid.toString() + ".json").toFile();
         if (!file.exists()) {
             return null;  // Return null if there's no data file for the given UUID.
         }
@@ -77,7 +83,7 @@ public class PlayerStorage {
      * @return the storage file.
      */
     public File getSaveFile() {
-        File file = EEssentials.storage.playerStorageDirectory.resolve(playerUUID.toString() + ".json").toFile();
+        File file = StorageManager.playerStorageDirectory.resolve(playerUUID.toString() + ".json").toFile();
         try {
             playedBefore = !file.createNewFile();
         } catch (IOException e) {
@@ -253,4 +259,5 @@ public class PlayerStorage {
     }
 
 }
+
 

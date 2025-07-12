@@ -13,6 +13,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public class MailCommands {
         Map<String, String> replacements = new HashMap<>();
         replacements.put("{receiver}", target.getName().getString());
         replacements.put("{message}", message);
-        LangManager.send(source, "Mail-Sent", replacements);
+        LangManager.send(source.getPlayer(), "Mail-Sent", replacements);
 
         // Notify target if they are online
         if (target != null) {
@@ -75,7 +76,7 @@ public class MailCommands {
     private static int readMail(CommandContext<ServerCommandSource> ctx) {
         ServerPlayerEntity player = ctx.getSource().getPlayer();
         if (player == null) {
-            ctx.getSource().sendMessage(Component.text("Only players can use this command."));
+            ctx.getSource().sendMessage(Text.literal("Only players can use this command."));
             return 0;
         }
 
@@ -103,7 +104,7 @@ public class MailCommands {
     private static int clearAllMail(CommandContext<ServerCommandSource> ctx) {
         ServerPlayerEntity player = ctx.getSource().getPlayer();
         if (player == null) {
-            ctx.getSource().sendMessage(Component.text("Only players can use this command."));
+            ctx.getSource().sendMessage(Text.literal("Only players can use this command."));
             return 0;
         }
 
@@ -117,7 +118,7 @@ public class MailCommands {
     private static int clearSpecificMail(CommandContext<ServerCommandSource> ctx, int index) {
         ServerPlayerEntity player = ctx.getSource().getPlayer();
         if (player == null) {
-            ctx.getSource().sendMessage(Component.text("Only players can use this command."));
+            ctx.getSource().sendMessage(Text.literal("Only players can use this command."));
             return 0;
         }
 
@@ -154,7 +155,7 @@ public class MailCommands {
                     continue;
                 }
                 if (SocialSpyCommand.isSocialSpyEnabled(spy)) {
-                    spy.sendMessage(componentMessage);
+                    spy.sendMessage(Text.literal(componentMessage.toString()));
                 }
             }
         }

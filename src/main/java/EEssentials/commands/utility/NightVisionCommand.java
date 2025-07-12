@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
 /**
  * Provides command to toggle night vision for players.
@@ -95,7 +94,7 @@ public class NightVisionCommand {
             String sourceKey = hasNightVision ? "NightVision-Disabled-Other-Notify" : "NightVision-Enabled-Other-Notify";
             Map<String, String> sourceReplacements = new HashMap<>();
             sourceReplacements.put("{player}", targetPlayer.getName().getString());
-            LangManager.send(source, sourceKey, sourceReplacements);
+            LangManager.send(source.getPlayer(), sourceKey, sourceReplacements);
         }
 
         return 1;

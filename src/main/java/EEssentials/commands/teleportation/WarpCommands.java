@@ -42,7 +42,7 @@ public class WarpCommands {
                             String warpName = StringArgumentType.getString(ctx, "name");
 
                             // Use these values to create the new Location
-                            Location warpLocation = new Location(player.getServerWorld(), player.getX(), player.getY(), player.getZ(), player.getPitch(), player.getYaw());
+                            Location warpLocation = new Location(player.getWorld(), player.getX(), player.getY(), player.getZ(), player.getPitch(), player.getYaw());
 
                             EEssentials.storage.locationManager.setWarp(warpName, warpLocation);
                             LangManager.send(player, "Warp-Set", Map.of("{warp}", warpName));
@@ -104,7 +104,7 @@ public class WarpCommands {
                         })
                 )
                 .executes(ctx -> {
-                    LangManager.send(ctx.getSource(), "Invalid-Warp-Command");
+                    LangManager.send(ctx.getSource().getPlayer(), "Invalid-Warp-Command");
                     return 0;
                 })
         );

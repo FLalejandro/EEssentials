@@ -19,14 +19,14 @@ import java.util.Set;
 @Mixin(TeleportCommand.class)
 public class TeleportCommandMixin {
 
-    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleport(Lnet/minecraft/server/world/ServerWorld;DDDLjava/util/Set;FF)Z"))
+    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleport(Lnet/minecraft/server/world/ServerWorld;DDDLjava/util/Set;FFZ)Z"))
     private static void savePreviousLocationBeforeTeleport(ServerCommandSource source, Entity target, ServerWorld world, double x, double y, double z, Set<PositionFlag> movementFlags, float yaw, float pitch, @Coerce Object facingLocation, CallbackInfo ci) {
         if (target instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) target;
 
             // Save the current position before the teleportation starts
             PlayerStorage storage = EEssentials.storage.getPlayerStorage(player);
-            storage.setPreviousLocation(new Location(player.getServerWorld(), player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch()));
+            storage.setPreviousLocation(new Location(player.getWorld(), player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch()));
             storage.save();
         }
     }

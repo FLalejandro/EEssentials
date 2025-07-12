@@ -28,7 +28,7 @@ public class TextCommand {
                                 commandName.toLowerCase(Locale.ENGLISH),2))
                 .executes(context -> {
                     Component message = getFileText(commandName, context.getSource());
-                            context.getSource().getPlayer().sendMessage(message);
+                            context.getSource().getPlayer().sendMessage(Text.literal(message.toString()));
                             return Command.SINGLE_SUCCESS;
                         }
                 )
@@ -61,6 +61,7 @@ public class TextCommand {
 
                 completeText = completeText.append(lineComponent);
             }
+            bufferedReader.close();
             return completeText;
         } catch (IOException e) {
             return Component.text("Failed to find the text file! Contact an administrator.");
@@ -90,6 +91,7 @@ public class TextCommand {
 
                 completeText = completeText.append(lineComponent).append(Component.newline());
             }
+            bufferedReader.close();
             return completeText;
         } catch (IOException e) {
             return Component.text("Failed to find the MOTD file! Contact an administrator.");

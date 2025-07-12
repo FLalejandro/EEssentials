@@ -24,7 +24,7 @@ public class CooldownCommandExecutor {
         ServerPlayerEntity player = source.getPlayer();
 
         if (player == null) {
-            LangManager.send(source, "Invalid-Player-Only");
+            LangManager.send(source.getPlayer(), "Invalid-Player-Only");
             return 1;
         }
 
@@ -39,7 +39,7 @@ public class CooldownCommandExecutor {
         long remainingCooldown = CooldownHelper.getCooldown(playerUUID, commandName);
 
         if (remainingCooldown > 0) {
-            LangManager.send(source, "Cooldown-Active", Map.of("{command}", commandName, "{cooldown}", String.valueOf(remainingCooldown)));
+            LangManager.send(source.getPlayer(), "Cooldown-Active", Map.of("{command}", commandName, "{cooldown}", String.valueOf(remainingCooldown)));
             return 1;
         }
 

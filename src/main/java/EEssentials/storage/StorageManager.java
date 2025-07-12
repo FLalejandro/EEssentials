@@ -35,11 +35,33 @@ public class StorageManager {
     }
 
     public PlayerStorage getPlayerStorage(UUID uuid) {
+        // Don't create PlayerStorage if mod isn't fully initialized
+        if (!EEssentials.isModFullyInitialized()) {
+            return null;
+        }
         return playerStores.getOrDefault(uuid, new PlayerStorage(uuid));
     }
 
     public PlayerStorage getPlayerStorage(ServerPlayerEntity player) {
         return getPlayerStorage(player.getUuid());
+    }
+
+    /**
+     * Force load player storage data. This should be called when the mod is fully initialized
+     * and we need to ensure player data is loaded.
+     *
+     * @param uuid the UUID of the player.
+     * @return the PlayerStorage instance for the player.
+     */
+    public PlayerStorage forceLoadPlayerStorage(UUID uuid) {
+        if (!EEssentials.isModFullyInitialized()) {
+            EEssentials.LOGGER.warn("Attempted to force load PlayerStorage before mod initialization complete");
+            return null;
+        }
+        
+        PlayerStorage storage = new PlayerStorage(uuid);
+        playerStores.put(uuid, storage);
+        return storage;
     }
 
     public void playerJoined(ServerPlayerEntity player) {

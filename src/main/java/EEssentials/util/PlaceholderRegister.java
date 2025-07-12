@@ -2,7 +2,6 @@ package EEssentials.util;
 
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.PlaceholderResult;
-import eu.pb4.placeholders.api.PlaceholderContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;

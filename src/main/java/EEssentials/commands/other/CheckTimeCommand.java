@@ -44,7 +44,7 @@ public class CheckTimeCommand {
         String formattedTime = formatTime(timeOfDay);
 
         // Use LangManager to send the formatted time
-        LangManager.send(source, "CheckTime", Map.of("{world-time}", formattedTime));
+        LangManager.send(source.getPlayer(), "CheckTime", Map.of("{world-time}", formattedTime));
 
         return 1;
     }
