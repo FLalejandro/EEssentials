@@ -86,7 +86,10 @@ public class RepairCommand {
                 return 0;
             }
 
-            DefaultedList<ItemStack> inventory = player.getInventory().main;
+            DefaultedList<ItemStack> inventory = DefaultedList.ofSize(player.getInventory().size());
+            for (int i = 0; i < player.getInventory().size(); i++) {
+                inventory.add(player.getInventory().getStack(i));
+            }
 
             boolean repairedAnyItem = false;
 

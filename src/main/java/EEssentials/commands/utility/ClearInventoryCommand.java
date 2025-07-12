@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -71,23 +72,23 @@ public class ClearInventoryCommand {
 
         if (player == null) return 0;
 
+        PlayerInventory playerInv = player.getInventory();
+
         // Clearing main inventory
-        player.getInventory().clear();
+        playerInv.clear();
 
         // Clearing armor slots
-        for (int i = 0; i < player.getInventory().armor.size(); i++) {
-            player.getInventory().armor.set(i, ItemStack.EMPTY);
+        for (int i = 5; i <= 8; i++) {
+            playerInv.setStack(i, ItemStack.EMPTY);
         }
 
         // Clearing off-hand slot
-        for (int i = 0; i < player.getInventory().offHand.size(); i++) {
-            player.getInventory().offHand.set(i, ItemStack.EMPTY);
-        }
+        playerInv.setStack(PlayerInventory.OFF_HAND_SLOT, ItemStack.EMPTY);
 
         if (player.equals(source.getPlayer())) {
             LangManager.send(player, "ClearInventory-Self");
         } else {
-            LangManager.send(source, "ClearInventory-Other", Map.of("{player}", player.getName().getString()));
+            LangManager.send(source.getPlayer(), "ClearInventory-Other", Map.of("{player}", player.getName().getString()));
         }
         return 1;
     }

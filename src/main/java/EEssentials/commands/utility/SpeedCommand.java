@@ -71,7 +71,7 @@ public class SpeedCommand {
                 "{speed-multiplier}", String.valueOf(speedMultiplier),
                 "{player}", player.getName().getString()
         );
-        LangManager.send(source, "Speed-Set-Self", replacements);
+        LangManager.send(source.getPlayer(), "Speed-Set-Self", replacements);
 
         return 1;
     }
@@ -81,7 +81,7 @@ public class SpeedCommand {
         ServerPlayerEntity player = source.getPlayer();
 
         if (player == null) return 1;
-        EntityAttributeInstance attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        EntityAttributeInstance attribute = player.getAttributeInstance(EntityAttributes.MOVEMENT_SPEED);
         if (attribute == null) return 1;
 
         EntityAttributeModifier modifier = new EntityAttributeModifier(
@@ -99,7 +99,7 @@ public class SpeedCommand {
                 "{speed-multiplier}", String.valueOf(speedMultiplier),
                 "{player}", player.getName().getString()
         );
-        LangManager.send(source, "Speed-Set-Self", replacements);
+        LangManager.send(source.getPlayer(), "Speed-Set-Self", replacements);
 
         return 1;
     }

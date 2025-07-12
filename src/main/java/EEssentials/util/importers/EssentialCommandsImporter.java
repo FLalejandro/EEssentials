@@ -5,14 +5,11 @@ import EEssentials.storage.PlayerStorage;
 import EEssentials.util.Location;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -56,7 +53,7 @@ public class EssentialCommandsImporter {
             NbtList homesNbtList = (NbtList) nbt;
             for (NbtElement t : homesNbtList) {
                 NbtCompound homeTag = (NbtCompound) t;
-                String homeName = homeTag.getString("homeName");
+                String homeName = homeTag.getString("homeName").orElseThrow();
                 Location location = Location.fromEssentialCommandsNbt(homeTag);
                 importedHomes.put(homeName, location);
                 EEssentials.LOGGER.info("Imported Home (" + homeName + ") with Location: " + location.toString());
@@ -64,7 +61,7 @@ public class EssentialCommandsImporter {
         } else {
             NbtCompound nbtCompound = (NbtCompound) nbt;
             nbtCompound.getKeys().forEach((key) -> {
-                Location loc = Location.fromEssentialCommandsNbt(nbtCompound.getCompound(key));
+                Location loc = Location.fromEssentialCommandsNbt(nbtCompound.getCompound(key).orElseThrow());
                 importedHomes.put(key, loc);
                 EEssentials.LOGGER.info("Imported Home (" + key + ") with Location: " + loc.toString());
             });
@@ -78,7 +75,7 @@ public class EssentialCommandsImporter {
             NbtList homesNbtList = (NbtList) nbt;
             for (NbtElement t : homesNbtList) {
                 NbtCompound homeTag = (NbtCompound) t;
-                String name = homeTag.getString("homeName");
+                String name = homeTag.getString("homeName").orElseThrow();
                 Location loc = Location.fromEssentialCommandsNbt(homeTag);
                 importedWarps.put(name, loc);
                 EEssentials.LOGGER.info("Imported Warp (" + name + ") with Location: " + loc.toString());
@@ -86,7 +83,7 @@ public class EssentialCommandsImporter {
         } else {
             NbtCompound nbtCompound = (NbtCompound) nbt;
             nbtCompound.getKeys().forEach((key) -> {
-                Location loc = Location.fromEssentialCommandsNbt(nbtCompound.getCompound(key));
+                Location loc = Location.fromEssentialCommandsNbt(nbtCompound.getCompound(key).orElseThrow());
                 importedWarps.put(key, loc);
                 EEssentials.LOGGER.info("Imported Warp (" + key + ") with Location: " + loc.toString());
             });

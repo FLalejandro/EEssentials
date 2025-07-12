@@ -37,10 +37,10 @@ public class SmiteCommand {
                     ServerPlayerEntity player = context.getSource().getPlayer();
                     if(player != null) {
                         Location lookingAt = getLookingAt(player);
-                        summonLightningAt(player.getServerWorld(), lookingAt.getX(), lookingAt.getY(), lookingAt.getZ());
-                        LangManager.send(context.getSource(), "Smite-Message");
+                        summonLightningAt(player.getWorld(), lookingAt.getX(), lookingAt.getY(), lookingAt.getZ());
+                        LangManager.send(context.getSource().getPlayer(), "Smite-Message");
                     } else {
-                        LangManager.send(context.getSource(), "Invalid-Player-Only");
+                        LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                     }
                     return Command.SINGLE_SUCCESS;
                 })
@@ -54,27 +54,27 @@ public class SmiteCommand {
                             if(!playerName.equals("all")) {
                                 ServerPlayerEntity target = EEssentials.server.getPlayerManager().getPlayer(playerName);
                                 if(target != null) {
-                                    summonLightningAt(target.getServerWorld(), target.getX(), target.getY(), target.getZ());
+                                    summonLightningAt(target.getWorld(), target.getX(), target.getY(), target.getZ());
                                     replacements.put("{player}", target.getName().getString());
-                                    LangManager.send(context.getSource(), "Smite-Player-Message", replacements);
+                                    LangManager.send(context.getSource().getPlayer(), "Smite-Player-Message", replacements);
                                     LangManager.send(target, "Smited-Message");
                                 } else {
                                     replacements.put("{input}", playerName);
-                                    LangManager.send(context.getSource(), "Invalid-Player", replacements);
+                                    LangManager.send(context.getSource().getPlayer(), "Invalid-Player", replacements);
                                 }
                             } else {
                                 if(Permissions.check(context.getSource(), SMITE_ALL_PERMISSION_NODE, 4)) {
                                     int playerCount = 0;
                                     List<ServerPlayerEntity> onlinePlayers = EEssentials.server.getPlayerManager().getPlayerList();
                                     for(ServerPlayerEntity target : onlinePlayers) {
-                                        summonLightningAt(target.getServerWorld(), target.getX(), target.getY(), target.getZ());
+                                        summonLightningAt(target.getWorld(), target.getX(), target.getY(), target.getZ());
                                         LangManager.send(target, "Smited-Message");
                                         playerCount++;
                                     }
                                     replacements.put("{amount}", String.valueOf(playerCount));
-                                    LangManager.send(context.getSource(), "Smite-All-Message", replacements);
+                                    LangManager.send(context.getSource().getPlayer(), "Smite-All-Message", replacements);
                                 } else {
-                                    LangManager.send(context.getSource(), "Invalid-Permission-All-Target");
+                                    LangManager.send(context.getSource().getPlayer(), "Invalid-Permission-All-Target");
                                 }
                             }
                             return Command.SINGLE_SUCCESS;
@@ -84,7 +84,7 @@ public class SmiteCommand {
     private static Location getLookingAt(ServerPlayerEntity player) {
         HitResult hitResult = player.raycast(500, 0, false);
         Vec3d target = hitResult.getPos();
-        return new Location(player.getServerWorld(), target.x, target.y, target.z);
+        return new Location(player.getWorld(), target.x, target.y, target.z);
     }
 
     private static void summonLightningAt(ServerWorld world, double x, double y, double z) {

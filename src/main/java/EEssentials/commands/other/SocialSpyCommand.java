@@ -9,7 +9,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class SocialSpyCommand {
-
     // Permission node for the Social Spy command.
     public static final String SOCIALSPY_PERMISSION_NODE = "eessentials.socialspy";
 

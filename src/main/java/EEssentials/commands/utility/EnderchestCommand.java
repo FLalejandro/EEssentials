@@ -77,7 +77,7 @@ public class EnderchestCommand {
             // Replace text messages with LangManager.send
             Map<String, String> replacements = new HashMap<>();
             replacements.put("{player}", targetPlayer.getName().getString());
-            LangManager.send(source, "Enderchest-Other",replacements);
+            LangManager.send(source.getPlayer(), "Enderchest-Other",replacements);
         }
 
         return 1;

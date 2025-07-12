@@ -15,9 +15,16 @@ import java.util.Optional;
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixin {
 
-    @Inject(method = "loadPlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;)Ljava/util/Optional;",
+    @Inject(method = "loadPlayerData(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/util/ErrorReporter;)Ljava/util/Optional;",
             at = @At("RETURN"), cancellable = true)
     public void onPlayerJoin(ServerPlayerEntity player, CallbackInfoReturnable<Optional<NbtCompound>> cir) {
+        // Prevent player data loading if the mod isn't fully initialized
+        if (!EEssentials.isModFullyInitialized()) {
+            EEssentials.LOGGER.info("Preventing player data loading for " + player.getGameProfile().getName() + " - mod not fully initialized");
+            cir.setReturnValue(Optional.empty());
+            return;
+        }
+
         Optional<NbtCompound> playerDataOptional = cir.getReturnValue();
 
         // Handle the player data being present or absent

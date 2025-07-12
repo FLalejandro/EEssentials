@@ -45,30 +45,30 @@ public class TPOfflineCommand {
 
         // If the target player is online, notify the executor
         if (source.getServer().getPlayerManager().getPlayer(targetName) != null) {
-            LangManager.send(source, "TPOffline-Online-Notify", Map.of("{player}", targetName));
+            LangManager.send(source.getPlayer(), "TPOffline-Online-Notify", Map.of("{player}", targetName));
             return 1;
         }
 
         GameProfile profile = getProfileForName(targetName);
         if (profile == null) {
-            LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+            LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
             return 0;
         }
 
         PlayerStorage storage = PlayerStorage.fromPlayerUUID(profile.getId());
         if (storage == null) {
-            LangManager.send(source, "TPOffline-No-Data", Map.of("{player}", targetName));
+            LangManager.send(source.getPlayer(), "TPOffline-No-Data", Map.of("{player}", targetName));
             return 0;
         }
 
         Location lastLogoutLocation = storage.getLogoutLocation();
         if (lastLogoutLocation == null) {
-            LangManager.send(source, "TPOffline-No-Logout-Location", Map.of("{player}", targetName));
+            LangManager.send(source.getPlayer(), "TPOffline-No-Logout-Location", Map.of("{player}", targetName));
             return 1;
         }
 
         lastLogoutLocation.teleport(executor);
-        LangManager.send(source, "TPOffline-Success", Map.of("{player}", targetName));
+        LangManager.send(source.getPlayer(), "TPOffline-Success", Map.of("{player}", targetName));
 
         return 1;
     }

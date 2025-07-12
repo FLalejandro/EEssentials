@@ -1,5 +1,6 @@
 package EEssentials.commands.other;
 
+import EEssentials.EEssentials;
 import EEssentials.lang.LangManager;
 import EEssentials.storage.PlayerStorage;
 import EEssentials.storage.StorageManager;
@@ -61,13 +62,13 @@ public class SeenCommand {
         UUID playerUUID;
         if (target != null) {
             // Player is online
-            LangManager.send(source, "Seen-Online", Map.of("{player}", target.getName().getString()));
+            LangManager.send(source.getPlayer(), "Seen-Online", Map.of("{player}", target.getName().getString()));
             return 1;
         } else {
             // Use GameProfile to resolve UUID
             GameProfile profile = getProfileForName(targetName);
             if (profile == null || profile.getId() == null) {
-                LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+                LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
                 return 0;
             }
             playerUUID = profile.getId();
@@ -75,13 +76,13 @@ public class SeenCommand {
 
         PlayerStorage storage = PlayerStorage.fromPlayerUUID(playerUUID);
         if (storage == null) {
-            LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+            LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
             return 0;
         }
         Instant lastOnline = storage.getLastTimeOnline();
         Duration duration = Duration.between(lastOnline, Instant.now());
         String timeString = formatDuration(duration);
-        LangManager.send(source, "Seen", Map.of("{player}", targetName, "{last-seen-time}", timeString));
+        LangManager.send(source.getPlayer(), "Seen", Map.of("{player}", targetName, "{last-seen-time}", timeString));
 
         return 1;
     }
@@ -90,7 +91,7 @@ public class SeenCommand {
         File[] files = StorageManager.playerStorageDirectory.toFile().listFiles();
         if (files != null) {
             for (File file : files) {
-                //System.out.println("Processing file: " + file.getName());
+                EEssentials.LOGGER.debug("Processing file: " + file.getName());
                 if (file.getName().endsWith(".json")) {
                     PlayerStorage storage = PlayerStorage.fromPlayerUUID(UUID.fromString(file.getName().replace(".json", "")));
                     if (storage != null && name.equals(storage.getPlayerName())) {

@@ -33,12 +33,12 @@ public class InvseeCommand {
         ServerPlayerEntity targetPlayer = ctx.getSource().getServer().getPlayerManager().getPlayer(targetProfile.getName());
 
         if (targetPlayer == null) {
-            LangManager.send(ctx.getSource(), "Invalid-Player");
+            LangManager.send(ctx.getSource().getPlayer(), "Invalid-Player");
             return 0;
         }
 
         if (player.getUuid().equals(targetPlayer.getUuid())) {
-            LangManager.send(ctx.getSource(), "Invalid-Self-Target");
+            LangManager.send(ctx.getSource().getPlayer(), "Invalid-Self-Target");
             return 0;
         }
 

@@ -173,7 +173,7 @@ public class HomeCommands {
         if (profile != null) {
             targetUUID = profile.getId();
         } else {
-            LangManager.send(source, "Invalid-Player", Map.of("{input}", targetName));
+            LangManager.send(source.getPlayer(), "Invalid-Player", Map.of("{input}", targetName));
             return 0;
         }
 
@@ -182,10 +182,10 @@ public class HomeCommands {
 
         if (location != null) {
             location.teleport(source.getPlayer());
-            LangManager.send(source, "Teleporting-To-Other-Home", Map.of("{home}", homeName, "{target}", targetName));
+            LangManager.send(source.getPlayer(), "Teleporting-To-Other-Home", Map.of("{home}", homeName, "{target}", targetName));
             return 1;
         } else {
-            LangManager.send(source, "Invalid-Home", Map.of("{input}", homeName));
+            LangManager.send(source.getPlayer(), "Invalid-Home", Map.of("{input}", homeName));
             return 0;
         }
     }

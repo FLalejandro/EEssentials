@@ -4,11 +4,11 @@ import EEssentials.lang.*;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.Collection;
 
@@ -55,12 +55,11 @@ public class BroadcastCommand {
 
         // Combine prefix and message, supporting modern text formatting
         String formattedMessage = prefix + message;
-        Component adventureComponent = ColorUtil.parseColour(formattedMessage);
+        Component messageComponent = ColorUtil.parseColour(formattedMessage);
 
-        // Send the Adventure component directly to all players using Audience
         for (ServerPlayerEntity player : players) {
-            Audience audience = player;
-            audience.sendMessage(adventureComponent);
+            String legacy = LegacyComponentSerializer.legacySection().serialize(messageComponent);
+            player.sendMessage(net.minecraft.text.Text.literal(legacy));
         }
 
         return 1;

@@ -40,7 +40,8 @@ public class UnaliveCommand {
         ServerPlayerEntity player = ctx.getSource().getPlayer();
         if (player == null) return 0;
 
-        player.damage(player.getDamageSources().generic(), Float.MAX_VALUE);
+        player.damage(player.getWorld(), player.getDamageSources().generic(), Float.MAX_VALUE);
+        player.setHealth(0);
 
         LangManager.send(player, "Unalive-Success");
         return 1;

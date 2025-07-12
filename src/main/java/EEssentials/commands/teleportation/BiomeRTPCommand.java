@@ -16,7 +16,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.datafixers.util.Pair;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.RegistryEntryPredicateArgumentType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -58,13 +57,13 @@ public class BiomeRTPCommand {
                                 .executes(context -> {
                                     ServerPlayerEntity player = context.getSource().getPlayer();
                                     if(player != null) {
-                                        RTPWorldSettings worldSettings = RTPSettings.getWorldSettings(player.getServerWorld());
+                                        RTPWorldSettings worldSettings = RTPSettings.getWorldSettings(player.getWorld());
                                         if(worldSettings != null) {
                                             long playerCooldown = worldSettings.getPlayerCooldown(player);
                                             if(playerCooldown <= 0 || Permissions.check(player,
                                                     RTPCommand.RTP_COOLDOWN_BYPASS_PERMISSION_NODE, 2)) {
                                                 if(!queuedPlayerNames.contains(player.getName().getString())) {
-                                                    LangManager.send(context.getSource(), "RTP-Queued-Message");
+                                                    LangManager.send(player, "RTP-Queued-Message");
                                                     queuedPlayerNames.add(player.getName().getString());
                                                     String biomeArg = StringArgumentType.getString(context, "biome");
                                                     try {
@@ -77,21 +76,21 @@ public class BiomeRTPCommand {
                                                         });
                                                     } catch (Exception e) {
                                                         e.printStackTrace();
-                                                        LangManager.send(context.getSource(), "RTP-Error");
+                                                        LangManager.send(player, "RTP-Error");
                                                     }
                                                 } else {
-                                                    LangManager.send(context.getSource(), "RTP-Already-Queued-Message");
+                                                    LangManager.send(player, "RTP-Already-Queued-Message");
                                                 }
                                             } else {
                                                 Map<String, String> replacements = new HashMap<>();
                                                 replacements.put("{cooldown}", String.valueOf(playerCooldown));
-                                                LangManager.send(context.getSource(), "RTP-Cooldown-Message", replacements);
+                                                LangManager.send(player, "RTP-Cooldown-Message", replacements);
                                             }
                                         } else {
-                                            LangManager.send(context.getSource(), "RTP-World-Blacklisted");
+                                            LangManager.send(player, "RTP-World-Blacklisted");
                                         }
                                     } else {
-                                        LangManager.send(context.getSource(), "Invalid-Player-Only");
+                                        LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                                     }
                                     return Command.SINGLE_SUCCESS;
                                 })));
@@ -170,7 +169,7 @@ public class BiomeRTPCommand {
     private static SuggestionProvider<ServerCommandSource> suggestBiomes() {
         return (context, builder) -> {
             ServerCommandSource source = context.getSource();
-            Registry<Biome> biomeRegistry = source.getServer().getRegistryManager().get(RegistryKeys.BIOME);
+            Registry<Biome> biomeRegistry = source.getServer().getRegistryManager().getOrThrow(RegistryKeys.BIOME);
             biomeRegistry.streamEntries()
                     .map(RegistryEntry::getKey)
                     .filter(Optional::isPresent)

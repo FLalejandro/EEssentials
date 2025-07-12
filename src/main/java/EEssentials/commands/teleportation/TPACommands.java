@@ -169,13 +169,13 @@ public class TPACommands {
 
                                 // Depending on the type of request, perform the appropriate teleportation
                                 if (request.type == TeleportRequest.RequestType.TPA) {
-                                    Location targetLocation = new Location(target.getServerWorld(), target.getX(), target.getY(), target.getZ());
+                                    Location targetLocation = new Location(target.getWorld(), target.getX(), target.getY(), target.getZ());
                                     targetLocation.teleport(requester);
 
                                     LangManager.send(requester, "Teleporting-Players");
                                     LangManager.send(target, "TPA-Accept", replacements);
                                 } else {  // TeleportRequest.RequestType.TPAHERE
-                                    Location requesterLocation = new Location(requester.getServerWorld(), requester.getX(), requester.getY(), requester.getZ());
+                                    Location requesterLocation = new Location(requester.getWorld(), requester.getX(), requester.getY(), requester.getZ());
                                     requesterLocation.teleport(target);
 
                                     LangManager.send(target, "Teleporting-Players");

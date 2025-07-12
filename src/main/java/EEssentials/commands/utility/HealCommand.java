@@ -63,7 +63,7 @@ public class HealCommand {
             LangManager.send(player, "Heal-Self");  // Player healing themselves
         } else {
             LangManager.send(player, "Heal-Other-Notify", Map.of("{source}", source.getName()));  // Player being healed by someone else
-            LangManager.send(source, "Heal-Other", Map.of("{player}", player.getName().getString()));  // The healer receives this message
+            LangManager.send(source.getPlayer(), "Heal-Other", Map.of("{player}", player.getName().getString()));  // The healer receives this message
         }
 
         return 1;

@@ -22,7 +22,7 @@ public class ConfigVersionUpdater {
     public void updateConfig() {
         String configVersion = mainConfig.getString("Config-Version", "1.0.0");
 
-        if (!configVersion.equals(currentVersion)) {
+        if (isOlderVersion(configVersion, currentVersion)) {
             LOGGER.info("Updating config from version " + configVersion + " to " + currentVersion);
 
             Configuration defaultConfig = YamlConfiguration.loadConfiguration(
@@ -54,7 +54,7 @@ public class ConfigVersionUpdater {
 
         String langVersion = langConfig.getString("Config-Version", "1.0.0");
 
-        if (!langVersion.equals(currentVersion)) {
+        if (isOlderVersion(langVersion, currentVersion)) {
             LOGGER.info("Updating lang config from version " + langVersion + " to " + currentVersion);
 
             Configuration defaultLangConfig = YamlConfiguration.loadConfiguration(
@@ -88,24 +88,44 @@ public class ConfigVersionUpdater {
     }
 
     private boolean isOlderVersion(String currentVersion, String targetVersion) {
-        int[] currentParts = parseVersion(currentVersion);
-        int[] targetParts = parseVersion(targetVersion);
+        try {
+            int[] currentParts = parseVersion(currentVersion);
+            int[] targetParts = parseVersion(targetVersion);
 
-        for (int i = 0; i < currentParts.length; i++) {
-            if (currentParts[i] < targetParts[i]) {
-                return true;
-            } else if (currentParts[i] > targetParts[i]) {
-                return false;
+            // Compare version parts, handling different lengths
+            int maxLength = Math.max(currentParts.length, targetParts.length);
+            for (int i = 0; i < maxLength; i++) {
+                int currentPart = i < currentParts.length ? currentParts[i] : 0;
+                int targetPart = i < targetParts.length ? targetParts[i] : 0;
+                
+                if (currentPart < targetPart) {
+                    return true;
+                } else if (currentPart > targetPart) {
+                    return false;
+                }
             }
+            return false; // Versions are equal
+        } catch (Exception e) {
+            LOGGER.warn("Failed to parse version strings: current='{}', target='{}'. Using string comparison as fallback.", currentVersion, targetVersion);
+            // Fallback to string comparison if parsing fails
+            return currentVersion.compareTo(targetVersion) < 0;
         }
-        return false;
     }
 
     private int[] parseVersion(String version) {
+        if (version == null || version.trim().isEmpty()) {
+            return new int[]{0};
+        }
+        
         String[] parts = version.split("\\.");
         int[] numbers = new int[parts.length];
         for (int i = 0; i < parts.length; i++) {
-            numbers[i] = Integer.parseInt(parts[i]);
+            try {
+                numbers[i] = Integer.parseInt(parts[i].trim());
+            } catch (NumberFormatException e) {
+                LOGGER.warn("Invalid version part '{}' in version '{}', treating as 0", parts[i], version);
+                numbers[i] = 0;
+            }
         }
         return numbers;
     }

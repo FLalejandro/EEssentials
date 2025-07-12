@@ -8,7 +8,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
@@ -34,26 +33,27 @@ public class HatCommand {
                             ServerPlayerEntity player = context.getSource().getPlayer();
                             if(player != null) {
                                 PlayerInventory playerInv = player.getInventory();
-                                int selectedSlot = playerInv.selectedSlot;
-                                ItemStack heldItem = playerInv.main.get(selectedSlot);
+                                int selectedSlot = playerInv.getSelectedSlot();
+                                ItemStack heldItem = playerInv.getStack(selectedSlot);
                                 if(heldItem.isEmpty()) {
                                     LangManager.send(player, "Hat-Hand-Empty-Message");
                                 } else if(
                                         Permissions.check(player, HAT_BLACKLIST_BYPASS_NODE, 2) ||
                                                 !HatSettings.isBlacklisted(heldItem)){
-                                    ItemStack headItem = playerInv.armor.get(3);
-                                    playerInv.armor.set(3, heldItem);
-                                    playerInv.main.set(selectedSlot, headItem);
+                                    ItemStack headItem = playerInv.getStack(39);
+                                    playerInv.setStack(39, heldItem);
+                                    playerInv.setStack(selectedSlot, headItem);
                                     replacements.put("{item-hover}", ColorUtil.toMiniItemHover(heldItem));
-                                    replacements.put("{item-name-formatted}", ColorUtil.componentToString(heldItem.getName().asComponent()));
+                                    // Use the item's translation key for formatting
+                                    replacements.put("{item-name-formatted}", "<lang:" + heldItem.getItem().getTranslationKey() + ">");
                                     replacements.put("{item}", heldItem.getName().getString());
-                                    replacements.put("{item-type}", "<lang:" + ((TranslatableComponent)heldItem.getItem().getName().asComponent()).key() + ">");
+                                    replacements.put("{item-type}", "<lang:" + heldItem.getItem().getTranslationKey() + ">");
                                     LangManager.send(player, "Hat-Equipped-Message", replacements);
                                 } else {
                                     LangManager.send(player, "Hat-Blacklisted-Message");
                                 }
                             } else {
-                                LangManager.send(context.getSource(), "Invalid-Player-Only");
+                                LangManager.send(context.getSource().getPlayer(), "Invalid-Player-Only");
                             }
                             return Command.SINGLE_SUCCESS;
                         })

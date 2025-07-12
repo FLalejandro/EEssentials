@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.MinecraftServer;
@@ -119,9 +119,6 @@ public class MessageCommands {
                 socialSpyMessage = socialSpyMessage.replace(entry.getKey(), entry.getValue());
             }
 
-            // Use ColorUtil to parse the formatted message into a Component
-            Component componentMessage = ColorUtil.parseColour(socialSpyMessage);
-
             for (ServerPlayerEntity spy : ctx.getSource().getServer().getPlayerManager().getPlayerList()) {
                 // Skip sending the message to the sender/receiver
                 if (spy.equals(sender) || spy.equals(receiver)) {
@@ -129,8 +126,10 @@ public class MessageCommands {
                 }
 
                 if (SocialSpyCommand.isSocialSpyEnabled(spy)) {
-                    // Use Adventure's Audience to send the message
-                    spy.sendMessage(componentMessage);
+                    // Parse to Kyori Component, serialize to legacy string, then send as Text.literal
+                    net.kyori.adventure.text.Component componentMessage = ColorUtil.parseColour(socialSpyMessage);
+                    String legacy = LegacyComponentSerializer.legacySection().serialize(componentMessage);
+                    spy.sendMessage(net.minecraft.text.Text.literal(legacy));
                     spies.add(spy);
                 }
             }
@@ -179,7 +178,7 @@ public class MessageCommands {
 
         // Send messages to both the target and the sender
         LangManager.send(target, "Message-Receive", replacements);
-        LangManager.send(source, "Message-Send", replacements);
+        LangManager.send(source.getPlayer(), "Message-Send", replacements);
 
         // Social Spy
         if (!isConsole) {
