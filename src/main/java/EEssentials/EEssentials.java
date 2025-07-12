@@ -358,34 +358,34 @@ public class EEssentials implements ModInitializer {
             // Schedule a task with a 2-second delay
             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
             scheduler.schedule(() -> {
-            setupPermissions();
-            EEssentials.server = server;
-            storage.serverStarted();
-            
-            // Load Locations.json after the server has started
-            if (storage.locationManager != null) {
-                storage.locationManager.load();
-                LOGGER.info("Locations.json loaded successfully.");
-            } else {
-                LOGGER.warn("locationManager is null, cannot load Locations.json");
-            }
+                setupPermissions();
+                EEssentials.server = server;
+                storage.serverStarted();
+                
+                // Load Locations.json after the server has started
+                if (storage.locationManager != null) {
+                    storage.locationManager.load();
+                    LOGGER.info("Locations.json loaded successfully.");
+                } else {
+                    LOGGER.warn("locationManager is null, cannot load Locations.json");
+                }
 
-            // Read the EssentialCommands import toggle from the configuration
-            boolean ECImportFlag = mainConfig.getBoolean("Importers.EssentialCommands", false);
+                // Read the EssentialCommands import toggle from the configuration
+                boolean ECImportFlag = mainConfig.getBoolean("Importers.EssentialCommands", false);
 
-            if (ECImportFlag && !storage.locationManager.modImports.contains("essential_commands")) {
-                LOGGER.info("Importing World Data from Essential Commands...");
-                EssentialCommandsImporter.loadEssentialCommandsWorldData();
-                LOGGER.info("Imported World Data from Essential Commands.");
-                storage.locationManager.modImports.add("essential_commands");
-                storage.locationManager.save();
-            } else {
-                LOGGER.info("Importing from Essential Commands is disabled in the configuration.");
-            }
+                if (ECImportFlag && !storage.locationManager.modImports.contains("essential_commands")) {
+                    LOGGER.info("Importing World Data from Essential Commands...");
+                    EssentialCommandsImporter.loadEssentialCommandsWorldData();
+                    LOGGER.info("Imported World Data from Essential Commands.");
+                    storage.locationManager.modImports.add("essential_commands");
+                    storage.locationManager.save();
+                } else {
+                    LOGGER.info("Importing from Essential Commands is disabled in the configuration.");
+                }
 
-            // UPDATE THE FLAG THAT THE MOD DATA IS FULLY LOADED
-            isModFullyInitialized = true;
-            LOGGER.info("EEssentials initialization complete - players can now join!");
+                // Mod is fully loaded, players can join
+                isModFullyInitialized = true;
+                LOGGER.info("EEssentials initialization complete - players can now join!");
             }, 2, TimeUnit.SECONDS);
 
             // Shutdown the scheduler after the task is completed
