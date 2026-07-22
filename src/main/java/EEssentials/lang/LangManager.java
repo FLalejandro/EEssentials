@@ -38,7 +38,7 @@ public class LangManager {
         if(lang == null) return;
         if(replacements != null && !replacements.isEmpty()) {
             for(Map.Entry<String, String> entry : replacements.entrySet()) {
-                lang = lang.replace(entry.getKey(), entry.getValue());
+                lang = lang.replace(entry.getKey(), ColorUtil.escapeInput(entry.getValue()));
             }
         }
         String prefix = getLang(prefixKey);

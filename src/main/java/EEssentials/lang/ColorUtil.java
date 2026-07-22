@@ -19,6 +19,15 @@ public class ColorUtil {
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]){6}");
     private static final Pattern LEGACY_PATTERN = Pattern.compile("[&§]([0-9a-fA-fk-oK-OrR])");
 
+    /**
+     * Escapes MiniMessage tags in untrusted input (e.g. player names, chat messages)
+     * so they are rendered as plain text instead of being parsed as formatting,
+     * hover text, or clickable commands.
+     */
+    public static String escapeInput(String input) {
+        return MiniMessage.miniMessage().escapeTags(input);
+    }
+
     public static Component parseColour(String input) {
         input = replaceCodes(input);
         return MiniMessage.miniMessage().deserialize(input);

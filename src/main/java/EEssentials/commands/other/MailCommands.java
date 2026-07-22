@@ -145,7 +145,7 @@ public class MailCommands {
         String socialSpyMessage = LangManager.getLang("Prefix-Social-Spy");
         if (socialSpyMessage != null) {
             for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                socialSpyMessage = socialSpyMessage.replace(entry.getKey(), entry.getValue());
+                socialSpyMessage = socialSpyMessage.replace(entry.getKey(), ColorUtil.escapeInput(entry.getValue()));
             }
 
             Component componentMessage = ColorUtil.parseColour(socialSpyMessage);

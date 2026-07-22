@@ -116,7 +116,7 @@ public class MessageCommands {
         if (socialSpyMessage != null) {
             // Replace placeholders in the Social Spy message
             for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                socialSpyMessage = socialSpyMessage.replace(entry.getKey(), entry.getValue());
+                socialSpyMessage = socialSpyMessage.replace(entry.getKey(), ColorUtil.escapeInput(entry.getValue()));
             }
 
             // Use ColorUtil to parse the formatted message into a Component
@@ -173,7 +173,7 @@ public class MessageCommands {
 
         // Check if the target has ignored them
         if (!isConsole && IgnoreManager.hasIgnored(target, player)) {
-            LangManager.send(player, "Ignore", replacements);
+            LangManager.send(player, "Ignore", Map.of("{player}", target.getName().getString()));
             return 1;
         }
 
@@ -209,7 +209,7 @@ public class MessageCommands {
 
         // Check if the target has ignored the sender
         if (IgnoreManager.hasIgnored(target, player)) {
-            LangManager.send(player, "Ignore", Map.of("player", target.getName().getString()));
+            LangManager.send(player, "Ignore", Map.of("{player}", target.getName().getString()));
             return 1;
         }
 
